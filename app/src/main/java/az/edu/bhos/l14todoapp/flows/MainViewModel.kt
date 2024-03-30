@@ -24,11 +24,35 @@ class MainViewModel(
             todoRepo.syncTodos()
         }
 
+//        todoRepo.observeTodoEntries()
+//            .onEach { todos ->
+//                val submit=todos.groupBy { it.weekday }
+//                    .map { entry->TodoBundle(entry.key,entry.value) }
+//
+//                _todoBundles.postValue(submit)
+//            }.launchIn(viewModelScope)
+
         todoRepo.observeTodoEntries()
             .onEach { todos ->
-                // todo convert todos to bundles
+                val submit = todos.groupBy { it.weekday }
+                    .map { entry -> TodoBundle(entry.key, entry.value) }
+                    .sortedBy { todoBundle ->
+                        // Convert weekday strings to corresponding indices
+                        when (todoBundle.weekday.toLowerCase()) {
+                            "sunday" -> 0
+                            "monday" -> 1
+                            "tuesday" -> 2
+                            "wednesday" -> 3
+                            "thursday" -> 4
+                            "friday" -> 5
+                            "saturday" -> 6
+                            else -> 7 // Any other weekday comes last
+                        }
+                    }
 
-                _todoBundles.postValue(emptyList())
+                _todoBundles.postValue(submit)
             }.launchIn(viewModelScope)
+
+
     }
 }
