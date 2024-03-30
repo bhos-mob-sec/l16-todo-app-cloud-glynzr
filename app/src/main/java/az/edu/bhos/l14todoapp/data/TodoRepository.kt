@@ -8,7 +8,6 @@ interface TodoRepository {
     fun observeTodoEntries(): Flow<List<TodoEntity>>
     suspend fun save(todoEntity: TodoEntity)
 }
-
 class TodoRepositoryImpl(
     private val localData: TodoLocalData,
     private val remoteData: TodoRemoteData
@@ -16,8 +15,12 @@ class TodoRepositoryImpl(
 
     override suspend fun syncTodos() {
         val todoList = remoteData.getTodos()
-        // TODO save to local
+         todoList.map { todoDto ->
+            localData.save(todoDto.toEntity())
+        }
+
     }
+
 
     override fun observeTodoEntries(): Flow<List<TodoEntity>> {
         return localData.observeTodoItems()
@@ -26,5 +29,4 @@ class TodoRepositoryImpl(
     override suspend fun save(todoEntity: TodoEntity) {
         localData.save(todoEntity)
     }
-
 }
